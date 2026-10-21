@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Profile | CareerCompass</title>
+  <meta name="description" content="Detailed career guide profile, qualifications, expertise areas, and mentorship availability.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 0; flex: 1;">
+    <div class="container container-narrow">
+      <div style="margin-bottom: 1.5rem;">
+        <a href="/mentors.html" class="btn btn-sm btn-secondary">&larr; Back to Mentors Directory</a>
+      </div>
+
+      <div id="mentorProfileCard">
+        <div style="text-align: center; padding: 4rem; color: var(--slate-400);">Loading mentor profile...</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const mentorId = urlParams.get('id') || '2';
+      loadMentorProfile(mentorId);
+    });
+
+    async function loadMentorProfile(id) {
+      const card = document.getElementById('mentorProfileCard');
+      try {
+        const res = await API.get(`/api/mentors/${id}`);
+        if (res.success && res.data) {
+          const m = res.data;
+          card.innerHTML = `
+            <div class="card" style="padding: 2.5rem; box-shadow: var(--shadow-md);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                  <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge badge-success">✓ Verified Career Guide</span>
+                    <span class="badge badge-navy">${m.experienceYears || 0} Years Experience</span>
+                  </div>
+                  <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">${m.fullName}</h1>
+                  <p style="font-size: 1.1rem; color: var(--blue-600); font-weight: 600;">
+                    ${m.currentDesignation || 'Principal Specialist'} • ${m.organization || 'Industry Enterprise'}
+                  </p>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-primary" onclick="initiateConnect(${m.userId}, '${m.fullName.replace(/'/g, "\\'")}')">
+                    Request Mentorship 🤝
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bio -->
+              <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--navy-900);">About & Mentorship Philosophy</h3>
+                <p style="color: var(--slate-600); font-size: 1rem; line-height: 1.6;">
+                  ${m.bio || 'Dedicated to assisting students in transitioning from campus to high-impact industry careers.'}
+                </p>
+              </div>
+
+              <!-- Qualifications & Expertise Grid -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem;">
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--navy-900);">🎓 Qualifications & Degrees</h4>
+                  <p style="color: var(--slate-700); font-size: 0.92rem; line-height: 1.5;">
+                    ${m.qualifications || 'Advanced Degree in Computing & Technology'}
+                  </p>
+                </div>
+
+                <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem;">
+                  <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--navy-900);">⚡ Focus Areas & Expertise</h4>
+                  <p style="color: var(--slate-700); font-size: 0.92rem; line-height: 1.5;">
+                    ${m.expertiseAreas || 'Software Architecture, Machine Learning, Career Strategy'}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Availability -->
+              <div style="background-color: var(--blue-50); border: 1px solid var(--blue-100); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                  <strong style="color: var(--navy-900); font-size: 0.95rem; display: block;">Mentorship Availability:</strong>
+                  <span style="color: var(--blue-600); font-size: 0.9rem;">${m.availabilityInfo || 'Weekdays & Weekends (Flexible)'}</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-accent" onclick="initiateConnect(${m.userId}, '${m.fullName.replace(/'/g, "\\'")}')">
+                  Send Guidance Inquiry &rarr;
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        card.innerHTML = `<div style="color: var(--rose-500); padding: 2rem;">Failed to load mentor: ${err.message}</div>`;
+      }
+    }
+
+    async function initiateConnect(mentorId, mentorName) {
+      const msg = prompt(`Enter a brief message for ${mentorName}:`, "Hello! I would appreciate your guidance on preparing for technical interviews and roadmap milestones.");
+      if (msg === null) return;
+      if (!msg.trim()) {
+        alert("Please enter a brief message.");
+        return;
+      }
+
+      try {
+        const res = await API.post(`/api/mentors/${mentorId}/connect`, { message: msg.trim() });
+        if (res.success) {
+          API.showToast("Connection request sent! View status in your dashboard.", "success");
+        } else {
+          API.showToast(res.message || "Failed to send request", "error");
+        }
+      } catch (e) {
+        API.showToast(e.message, "error");
+      }
+    }
+  </script>
+</body>
+</html>

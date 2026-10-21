@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Details | CareerCompass</title>
+  <meta name="description" content="Comprehensive career profile including education requirements, skills, salary range, and roadmap.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 0; flex: 1;">
+    <div class="container">
+      <div style="margin-bottom: 1.5rem;">
+        <a href="/careers.html" class="btn btn-sm btn-secondary">&larr; Back to Career Library</a>
+      </div>
+
+      <div id="careerDetailsContainer">
+        <div style="text-align: center; padding: 4rem; color: var(--slate-400);">Loading career details...</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const careerId = urlParams.get('id') || '1';
+      loadCareer(careerId);
+    });
+
+    async function loadCareer(id) {
+      const container = document.getElementById('careerDetailsContainer');
+      try {
+        const res = await API.get(`/api/careers/${id}`);
+        if (res.success && res.data) {
+          const c = res.data;
+
+          // Also fetch related courses in this category
+          let coursesHtml = '';
+          try {
+            const courseRes = await API.get(`/api/courses/all?category=${encodeURIComponent(c.category)}`);
+            if (courseRes.success && courseRes.data && courseRes.data.length > 0) {
+              coursesHtml = courseRes.data.slice(0, 3).map(co => `
+                <div style="padding: 1rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: var(--white); margin-bottom: 0.75rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                      <h4 style="font-size: 0.98rem; margin-bottom: 0.25rem;">${co.title}</h4>
+                      <p style="font-size: 0.82rem; color: var(--slate-500);">${co.provider} • Rating: ⭐ ${co.rating || '4.8'}</p>
+                    </div>
+                    <a href="${co.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary">Learn &rarr;</a>
+                  </div>
+                </div>
+              `).join('');
+            }
+          } catch (e) {
+            console.warn("Could not load courses:", e);
+          }
+
+          container.innerHTML = `
+            <!-- Top Hero Banner -->
+            <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+                <div style="max-width: 750px;">
+                  <span class="badge badge-navy" style="margin-bottom: 0.75rem;">${c.category}</span>
+                  <h1 style="font-size: 2.25rem; margin-bottom: 0.75rem;">${c.title}</h1>
+                  <p style="color: var(--slate-600); font-size: 1.05rem; line-height: 1.6;">${c.description}</p>
+                </div>
+                <div style="background-color: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 1.5rem; min-width: 260px;">
+                  <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--slate-500); font-weight: 700; margin-bottom: 0.25rem;">Estimated Salary</div>
+                  <div style="font-size: 1.35rem; font-weight: 800; color: var(--navy-900);">${c.salaryRange || 'Competitive'}</div>
+                  <div style="font-size: 0.85rem; color: var(--emerald-500); font-weight: 600; margin-top: 0.25rem;">Job Outlook: ${c.jobOutlook || 'High Demand'}</div>
+                  <div style="margin-top: 1.25rem;">
+                    <a href="/roadmap.html?careerId=${c.id}" class="btn btn-accent" style="width: 100%;">
+                      Launch Career Roadmap &rarr;
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Details Split -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+              <!-- Left Column: Requirements & Steps -->
+              <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="card">
+                  <h3 style="font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                    🎓 Required Educational Background
+                  </h3>
+                  <p style="color: var(--slate-700); font-size: 0.98rem; line-height: 1.6;">
+                    ${c.requiredEducation || 'Bachelor degree in relevant computer science, engineering, or quantitative discipline.'}
+                  </p>
+                </div>
+
+                <div class="card">
+                  <h3 style="font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                    🚀 Recommended Preparation Steps
+                  </h3>
+                  <p style="color: var(--slate-700); font-size: 0.98rem; line-height: 1.6; white-space: pre-line;">
+                    ${c.preparationSteps || '1. Build programming fundamentals. 2. Develop practical projects. 3. Prepare for interviews.'}
+                  </p>
+                </div>
+
+                <div class="card">
+                  <h3 style="font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                    👔 Possible Job Roles & Career Progression
+                  </h3>
+                  <p style="color: var(--slate-700); font-size: 0.98rem; line-height: 1.6;">
+                    ${c.sampleRoles || 'Junior Engineer, Associate Specialist, Team Lead, Principal Architect'}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Right Column: Skills & Courses -->
+              <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="card">
+                  <h3 style="font-size: 1.15rem; margin-bottom: 1rem;">Core Competencies</h3>
+                  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div>
+                      <strong style="font-size: 0.85rem; color: var(--slate-500); text-transform: uppercase;">Technical Skills:</strong>
+                      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem;">
+                        <span class="badge badge-blue">Programming</span>
+                        <span class="badge badge-blue">System Architecture</span>
+                        <span class="badge badge-blue">Data Management</span>
+                        <span class="badge badge-blue">APIs & Protocols</span>
+                      </div>
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                      <strong style="font-size: 0.85rem; color: var(--slate-500); text-transform: uppercase;">Soft Skills:</strong>
+                      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem;">
+                        <span class="badge badge-navy">Problem Solving</span>
+                        <span class="badge badge-navy">Analytical Thinking</span>
+                        <span class="badge badge-navy">Clear Communication</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h3 style="font-size: 1.15rem; margin-bottom: 1rem;">Recommended Courses</h3>
+                  ${coursesHtml || '<p style="color:var(--slate-500); font-size:0.9rem;">Browse our courses library for verified learning paths.</p>'}
+                  <a href="/courses.html?category=${encodeURIComponent(c.category)}" style="display: inline-block; margin-top: 0.5rem; font-size: 0.85rem; font-weight: 600;">
+                    View All Recommended Courses &rarr;
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `<div style="color: var(--rose-500);">Career not found.</div>`;
+        }
+      } catch (e) {
+        container.innerHTML = `<div style="color: var(--rose-500);">Error: ${e.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

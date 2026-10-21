@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | CareerCompass</title>
+  <meta name="description" content="Central hub for your career roadmaps, recommendations, mentors, and progress.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="app-header"></header>
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-profile">
+        <h4 id="sidebarUserName">Student</h4>
+        <p id="sidebarUserBranch">Computer Science</p>
+      </div>
+
+      <ul class="sidebar-nav">
+        <li><a href="/dashboard.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Dashboard
+        </a></li>
+        <li><a href="/recommendations.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Recommendations
+        </a></li>
+        <li><a href="/careers.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Explore Careers
+        </a></li>
+        <li><a href="/roadmap.html?careerId=1" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
+          Career Roadmaps
+        </a></li>
+        <li><a href="/courses.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          Courses & Resources
+        </a></li>
+        <li><a href="/mentors.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Career Guides
+        </a></li>
+        <li><a href="/job-prep.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Job Preparation
+        </a></li>
+        <li><a href="/progress.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Progress Analytics
+        </a></li>
+        <li><a href="/profile.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Profile Settings
+        </a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Welcome Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1 style="font-size: 2rem;" id="welcomeHeading">Welcome back, Student!</h1>
+          <p style="color: var(--slate-500); margin-top: 0.25rem;">Here is your career development overview and next recommended milestones.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <a href="/recommendations.html" class="btn btn-primary">View Match Scores &rarr;</a>
+          <a href="/mentors.html" class="btn btn-secondary">Connect with Mentor</a>
+        </div>
+      </div>
+
+      <!-- Profile Alert if Incomplete -->
+      <div id="profileBanner" class="card" style="display: none; background: linear-gradient(135deg, #0284c7, #0ea5e9); color: var(--white); border: none; margin-bottom: 2rem; padding: 1.25rem 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 style="color: var(--white); font-size: 1.15rem; margin-bottom: 0.25rem;">Complete your profile to unlock 100% accurate recommendations</h3>
+            <p style="color: var(--blue-100); font-size: 0.9rem;">Add your technical skills and dream goals so our AI matching engine can refine your path.</p>
+          </div>
+          <a href="/student-details.html" class="btn btn-secondary" style="background-color: var(--white); color: var(--navy-900);">Complete Profile</a>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">📊</div>
+          <div class="stat-info">
+            <h3 id="statProfileComp">0%</h3>
+            <p>Profile Completeness</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon navy">🗺️</div>
+          <div class="stat-info">
+            <h3 id="statRoadmapSteps">0</h3>
+            <p>Completed Roadmap Steps</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🤝</div>
+          <div class="stat-info">
+            <h3 id="statMentors">0</h3>
+            <p>Active Mentors</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">🔖</div>
+          <div class="stat-info">
+            <h3 id="statSaved">0</h3>
+            <p>Bookmarked Resources</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Split Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Top Recommended Careers -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Top Career Matches</h3>
+            <a href="/recommendations.html" style="font-size: 0.85rem; font-weight: 600;">View All &rarr;</a>
+          </div>
+          <div id="topRecommendationsList" style="display: flex; flex-direction: column; gap: 1rem;">
+            <p style="color: var(--slate-400); font-size: 0.9rem;">Analyzing your profile...</p>
+          </div>
+        </div>
+
+        <!-- Active Roadmap Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Active Learning Roadmaps</h3>
+            <a href="/roadmap.html?careerId=1" style="font-size: 0.85rem; font-weight: 600;">Open Roadmap &rarr;</a>
+          </div>
+          <div id="activeRoadmapContainer">
+            <p style="color: var(--slate-400); font-size: 0.9rem;">Loading roadmap progress...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mentorship & Quick Actions -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <!-- My Mentor Connections -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Mentorship Requests & Chats</h3>
+            <a href="/mentors.html" style="font-size: 0.85rem; font-weight: 600;">Find Guides &rarr;</a>
+          </div>
+          <div id="mentorRequestsList" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <p style="color: var(--slate-400); font-size: 0.9rem;">No active connection requests yet.</p>
+          </div>
+        </div>
+
+        <!-- Job Prep Quick Checklist -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Interview & Job Readiness</h3>
+            <a href="/job-prep.html" style="font-size: 0.85rem; font-weight: 600;">Go to Prep Hub &rarr;</a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <a href="/resume-prep.html" class="stat-card" style="text-decoration: none; padding: 0.85rem 1rem;">
+              <span style="font-size: 1.5rem;">📄</span>
+              <div>
+                <strong style="color: var(--navy-900); font-size: 0.95rem;">Resume Checklist & Action Verbs</strong>
+                <p style="font-size: 0.8rem; color: var(--slate-500);">Review ATS guidelines and formatting</p>
+              </div>
+            </a>
+            <a href="/job-prep.html" class="stat-card" style="text-decoration: none; padding: 0.85rem 1rem;">
+              <span style="font-size: 1.5rem;">💡</span>
+              <div>
+                <strong style="color: var(--navy-900); font-size: 0.95rem;">Technical & Behavioral Questions</strong>
+                <p style="font-size: 0.8rem; color: var(--slate-500);">Practice STAR method answers</p>
+              </div>
+            </a>
+            <a href="/job-prep.html" class="stat-card" style="text-decoration: none; padding: 0.85rem 1rem;">
+              <span style="font-size: 1.5rem;">💻</span>
+              <div>
+                <strong style="color: var(--navy-900); font-size: 0.95rem;">Portfolio Project Suggestions</strong>
+                <p style="font-size: 0.8rem; color: var(--slate-500);">Standout projects to build and showcase</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await API.requireAuth(['STUDENT']);
+      if (!user) return;
+
+      document.getElementById('sidebarUserName').innerText = user.fullName;
+      document.getElementById('welcomeHeading').innerText = `Welcome back, ${user.fullName.split(' ')[0]}!`;
+
+      loadDashboardData();
+    });
+
+    async function loadDashboardData() {
+      try {
+        // Load student progress overview
+        const res = await API.get('/api/student/progress-overview');
+        if (res.success && res.data) {
+          const d = res.data;
+          document.getElementById('statProfileComp').innerText = `${d.profileCompletion || 0}%`;
+          document.getElementById('statRoadmapSteps').innerText = d.totalCompletedRoadmapSteps || 0;
+          document.getElementById('statMentors').innerText = d.activeConnectionsCount || 0;
+          document.getElementById('statSaved').innerText = d.savedResourcesCount || 0;
+
+          if (d.profileCompletion < 80) {
+            document.getElementById('profileBanner').style.display = 'block';
+          }
+
+          // Top recommendations
+          const recsContainer = document.getElementById('topRecommendationsList');
+          if (d.topRecommendations && d.topRecommendations.length > 0) {
+            recsContainer.innerHTML = d.topRecommendations.map(r => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: var(--white);">
+                <div>
+                  <h4 style="font-size: 0.98rem; margin-bottom: 0.2rem;">${r.career.title}</h4>
+                  <p style="font-size: 0.8rem; color: var(--slate-500);">${r.career.category}</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span class="badge ${r.matchPercentage >= 75 ? 'badge-success' : 'badge-blue'}" style="font-size: 0.85rem;">
+                    ${r.matchPercentage}% Match
+                  </span>
+                  <a href="/career-details.html?id=${r.career.id}" class="btn btn-sm btn-secondary">Explore</a>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            recsContainer.innerHTML = `<p style="color: var(--slate-500); font-size: 0.9rem;">Fill your profile skills to view matches.</p>`;
+          }
+
+          // Active Roadmaps
+          const rmContainer = document.getElementById('activeRoadmapContainer');
+          if (d.activeRoadmaps && d.activeRoadmaps.length > 0) {
+            rmContainer.innerHTML = d.activeRoadmaps.map(rm => `
+              <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+                  <strong style="font-size: 0.95rem;">${rm.careerTitle || rm.title}</strong>
+                  <span style="font-weight: 700; color: var(--blue-600);">${rm.progressPercentage}%</span>
+                </div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" style="width: ${rm.progressPercentage}%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.8rem; color: var(--slate-500);">
+                  <span>${rm.completedSteps} of ${rm.totalSteps} steps completed</span>
+                  <a href="/roadmap.html?careerId=${rm.careerId}" style="font-weight: 600;">Continue Step &rarr;</a>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            rmContainer.innerHTML = `
+              <div style="text-align: center; padding: 1.5rem 0;">
+                <p style="color: var(--slate-500); margin-bottom: 1rem;">You haven't started a roadmap yet.</p>
+                <a href="/roadmap.html?careerId=1" class="btn btn-sm btn-primary">Start Software Engineer Roadmap</a>
+              </div>
+            `;
+          }
+        }
+
+        // Load mentor connection requests
+        const reqRes = await API.get('/api/mentors/my-requests');
+        if (reqRes.success && reqRes.data) {
+          const list = document.getElementById('mentorRequestsList');
+          if (reqRes.data.length > 0) {
+            list.innerHTML = reqRes.data.map(m => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md);">
+                <div>
+                  <h4 style="font-size: 0.95rem;">${m.guideName}</h4>
+                  <p style="font-size: 0.8rem; color: var(--slate-500);">${m.guideDesignation || 'Career Guide'}</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span class="badge ${m.status === 'ACCEPTED' ? 'badge-success' : (m.status === 'PENDING' ? 'badge-warning' : 'badge-danger')}">
+                    ${m.status}
+                  </span>
+                  ${m.status === 'ACCEPTED' ? `<a href="/chat.html?requestId=${m.id}" class="btn btn-sm btn-accent">Chat</a>` : ''}
+                </div>
+              </div>
+            `).join('');
+          } else {
+            list.innerHTML = `<p style="color: var(--slate-500); font-size: 0.9rem;">No mentor connections yet. Connect with verified guides!</p>`;
+          }
+        }
+      } catch (err) {
+        console.error("Dashboard data load error:", err);
+      }
+    }
+  </script>
+</body>
+</html>

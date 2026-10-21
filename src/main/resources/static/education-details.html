@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educational Background | CareerCompass</title>
+  <meta name="description" content="Add your education level, degree, branch, college, and grades.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 1.5rem; flex: 1;">
+    <div class="container container-narrow">
+      <!-- Stepper Header -->
+      <div style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; font-weight: 700; color: var(--navy-900);">Step 2 of 3: Education Details</span>
+          <span style="font-size: 0.85rem; color: var(--blue-600); font-weight: 600;">66% Complete</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: 66%;"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 2.5rem; box-shadow: var(--shadow-md);">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Educational Background</h1>
+          <p style="color: var(--slate-500); font-size: 0.95rem;">Helps our recommendation algorithm tailor career opportunities to your academic qualifications.</p>
+        </div>
+
+        <form id="educationDetailsForm" onsubmit="handleSave(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="educationLevel">Current Education Level *</label>
+              <select id="educationLevel" class="form-control" required>
+                <option value="">Select level...</option>
+                <option value="High School">High School / 12th Standard</option>
+                <option value="Undergraduate">Undergraduate (Bachelors)</option>
+                <option value="Postgraduate">Postgraduate (Masters)</option>
+                <option value="Diploma">Diploma / Vocational</option>
+                <option value="Doctorate">Doctorate / Ph.D.</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="degree">Degree *</label>
+              <input type="text" id="degree" class="form-control" placeholder="e.g. B.Tech, B.Sc, BCA, BBA, B.Com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="branch">Major / Branch / Specialization *</label>
+            <input type="text" id="branch" class="form-control" placeholder="e.g. Computer Science, Information Technology, Data Science, Mechanical" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="collegeName">College / University Name</label>
+            <input type="text" id="collegeName" class="form-control" placeholder="e.g. National Institute of Technology">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="yearOfStudy">Current Year of Study</label>
+              <select id="yearOfStudy" class="form-control">
+                <option value="">Select year...</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year (Final Year)</option>
+                <option value="Recent Graduate">Recent Graduate</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="marksOrCgpa">Grade / CGPA / Percentage</label>
+              <input type="text" id="marksOrCgpa" class="form-control" placeholder="e.g. 8.5 CGPA or 82%">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--slate-200);">
+            <a href="/student-details.html" class="btn btn-secondary">&larr; Back to Personal</a>
+            <button type="submit" id="saveBtn" class="btn btn-primary">Save & Continue to Skills &rarr;</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await API.requireAuth(['STUDENT']);
+      if (!user) return;
+
+      try {
+        const res = await API.get('/api/student/profile');
+        if (res.success && res.data) {
+          const p = res.data;
+          if (p.educationLevel) document.getElementById('educationLevel').value = p.educationLevel;
+          document.getElementById('degree').value = p.degree || '';
+          document.getElementById('branch').value = p.branch || '';
+          document.getElementById('collegeName').value = p.collegeName || '';
+          if (p.yearOfStudy) document.getElementById('yearOfStudy').value = p.yearOfStudy;
+          document.getElementById('marksOrCgpa').value = p.marksOrCgpa || '';
+        }
+      } catch (e) {
+        console.error("Error loading education details:", e);
+      }
+    });
+
+    async function handleSave(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'Saving...';
+
+      const payload = {
+        educationLevel: document.getElementById('educationLevel').value,
+        degree: document.getElementById('degree').value.trim(),
+        branch: document.getElementById('branch').value.trim(),
+        collegeName: document.getElementById('collegeName').value.trim(),
+        yearOfStudy: document.getElementById('yearOfStudy').value,
+        marksOrCgpa: document.getElementById('marksOrCgpa').value.trim()
+      };
+
+      try {
+        const res = await API.put('/api/student/profile', payload);
+        if (res.success) {
+          API.showToast("Education details saved!", "success");
+          setTimeout(() => {
+            window.location.href = '/skills-interests.html';
+          }, 500);
+        } else {
+          API.showToast(res.message || "Failed to update education details", "error");
+          saveBtn.disabled = false;
+          saveBtn.innerText = 'Save & Continue to Skills →';
+        }
+      } catch (err) {
+        API.showToast(err.message, "error");
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Save & Continue to Skills →';
+      }
+    }
+  </script>
+</body>
+</html>

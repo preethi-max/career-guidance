@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses & Learning Resources | CareerCompass</title>
+  <meta name="description" content="Explore top courses, tutorials, certifications, and documentation to build in-demand career skills.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 0; flex: 1;">
+    <div class="container">
+      <!-- Page Header -->
+      <div style="margin-bottom: 2.5rem;">
+        <span class="badge badge-navy">Skill Development</span>
+        <h1 style="font-size: 2.35rem; margin-top: 0.35rem;">Courses & Learning Resources</h1>
+        <p style="color: var(--slate-500); font-size: 1.05rem; margin-top: 0.25rem;">
+          Verified courses, open-source guides, and documentation to help you level up.
+        </p>
+      </div>
+
+      <!-- Filters & Search -->
+      <div style="background-color: var(--white); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+          <input type="text" id="courseSearch" class="form-control" style="flex: 2; min-width: 250px;" placeholder="Search courses by keyword, topic, or provider..." oninput="handleSearch()">
+          
+          <select id="levelFilter" class="form-control" style="flex: 1; min-width: 160px;" onchange="loadCourses()">
+            <option value="all">All Difficulty Levels</option>
+            <option value="BEGINNER">Beginner Level</option>
+            <option value="INTERMEDIATE">Intermediate Level</option>
+            <option value="ADVANCED">Advanced Level</option>
+          </select>
+
+          <select id="categoryFilter" class="form-control" style="flex: 1; min-width: 200px;" onchange="loadCourses()">
+            <option value="all">All Categories</option>
+          </select>
+        </div>
+
+        <!-- View Tabs -->
+        <div style="display: flex; gap: 0.5rem; border-top: 1px solid var(--slate-100); padding-top: 1rem;">
+          <button type="button" id="tabCoursesBtn" class="btn btn-sm btn-primary" onclick="switchTab('courses')">🎓 Interactive Courses</button>
+          <button type="button" id="tabDocsBtn" class="btn btn-sm btn-secondary" onclick="switchTab('docs')">📚 Docs, Books & Guides</button>
+          <button type="button" id="tabSavedBtn" class="btn btn-sm btn-secondary" onclick="switchTab('saved')">⭐ My Saved Bookmarks</button>
+        </div>
+      </div>
+
+      <!-- Courses / Resources Grid -->
+      <div id="contentGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+        <div style="text-align: center; padding: 3rem; color: var(--slate-400);">Loading learning materials...</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    let currentTab = 'courses';
+    let savedCourseIds = new Set();
+    let searchTimeout = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadCategories();
+      await loadSavedIds();
+      loadCourses();
+    });
+
+    async function loadSavedIds() {
+      try {
+        const res = await API.get('/api/courses/saved-ids');
+        if (res.success && res.data) {
+          savedCourseIds = new Set(res.data);
+        }
+      } catch (e) {
+        console.warn("Could not load saved ids:", e);
+      }
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await API.get('/api/courses/categories');
+        if (res.success && res.data) {
+          const select = document.getElementById('categoryFilter');
+          res.data.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.innerText = cat;
+            select.appendChild(opt);
+          });
+        }
+      } catch (e) {
+        console.error("Course categories error:", e);
+      }
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tabCoursesBtn').className = (tab === 'courses') ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+      document.getElementById('tabDocsBtn').className = (tab === 'docs') ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+      document.getElementById('tabSavedBtn').className = (tab === 'saved') ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+
+      if (tab === 'courses') loadCourses();
+      else if (tab === 'docs') loadDocs();
+      else if (tab === 'saved') loadSaved();
+    }
+
+    async function loadCourses() {
+      const search = document.getElementById('courseSearch').value.trim();
+      const level = document.getElementById('levelFilter').value;
+      const category = document.getElementById('categoryFilter').value;
+      const grid = document.getElementById('contentGrid');
+
+      let url = `/api/courses/all?category=${encodeURIComponent(category)}&level=${encodeURIComponent(level)}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+
+      try {
+        const res = await API.get(url);
+        if (res.success && res.data) {
+          const list = res.data;
+          if (list.length === 0) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: var(--white); border-radius: var(--radius-lg);">No courses found matching criteria.</div>`;
+            return;
+          }
+
+          grid.innerHTML = list.map(c => {
+            const isSaved = savedCourseIds.has(c.id);
+            return `
+              <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <span class="badge badge-navy">${c.level}</span>
+                    <button type="button" onclick="toggleSaveCourse(${c.id}, this)" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;" title="${isSaved ? 'Remove Bookmark' : 'Bookmark Course'}">
+                      ${isSaved ? '⭐' : '☆'}
+                    </button>
+                  </div>
+                  <h3 style="font-size: 1.2rem; margin-bottom: 0.4rem;">${c.title}</h3>
+                  <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 0.75rem;">
+                    Provider: <strong>${c.provider || 'Online'}</strong> • Category: ${c.careerCategory || 'Tech'}
+                  </p>
+                  <p style="color: var(--slate-600); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                    ${c.description || 'Comprehensive curriculum with practical hands-on exercises.'}
+                  </p>
+                  <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <span class="badge badge-blue">⭐ ${c.rating || '4.8'}</span>
+                    ${c.isFree ? '<span class="badge badge-success">Free Access</span>' : '<span class="badge badge-warning">Paid Course</span>'}
+                    ${c.certificationAvailable ? '<span class="badge badge-blue">Certificate</span>' : ''}
+                  </div>
+                </div>
+
+                <div style="padding-top: 1rem; border-top: 1px solid var(--slate-100);">
+                  <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="width: 100%;">
+                    Access Course Content &rarr;
+                  </a>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--rose-500);">Failed to load courses: ${err.message}</div>`;
+      }
+    }
+
+    async function loadDocs() {
+      const grid = document.getElementById('contentGrid');
+      try {
+        const res = await API.get('/api/courses/resources');
+        if (res.success && res.data) {
+          const list = res.data;
+          grid.innerHTML = list.map(r => `
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <span class="badge badge-blue" style="margin-bottom: 0.5rem;">${r.type}</span>
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">${r.title}</h3>
+                <p style="color: var(--slate-600); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem;">
+                  ${r.description}
+                </p>
+              </div>
+              <div style="padding-top: 1rem; border-top: 1px solid var(--slate-100);">
+                <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary" style="width: 100%;">
+                  Read Documentation &rarr;
+                </a>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--rose-500);">${e.message}</div>`;
+      }
+    }
+
+    async function loadSaved() {
+      const grid = document.getElementById('contentGrid');
+      try {
+        const res = await API.get('/api/courses/saved');
+        if (res.success && res.data) {
+          const courses = res.data.courses || [];
+          if (courses.length === 0) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background: var(--white); border-radius: var(--radius-lg);">You haven't bookmarked any courses yet. Click the star icon on any course to save it here!</div>`;
+            return;
+          }
+
+          grid.innerHTML = courses.map(c => `
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <span class="badge badge-success" style="margin-bottom: 0.5rem;">Saved Bookmark</span>
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.4rem;">${c.title}</h3>
+                <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 0.75rem;">${c.provider} • Rating: ⭐ ${c.rating}</p>
+                <p style="color: var(--slate-600); font-size: 0.9rem; line-height: 1.5;">${c.description}</p>
+              </div>
+              <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--slate-100); display: flex; gap: 0.5rem;">
+                <a href="${c.url}" target="_blank" class="btn btn-sm btn-primary" style="flex: 1;">Open Course</a>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="toggleSaveCourse(${c.id}, this)">Remove</button>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--rose-500);">${e.message}</div>`;
+      }
+    }
+
+    async function toggleSaveCourse(courseId, btn) {
+      try {
+        const res = await API.post('/api/courses/save', { resourceType: 'COURSE', resourceId: courseId });
+        if (res.success && res.data) {
+          if (res.data.saved) {
+            savedCourseIds.add(courseId);
+            btn.innerText = '⭐';
+            API.showToast("Course saved to your bookmarks!", "success");
+          } else {
+            savedCourseIds.delete(courseId);
+            btn.innerText = '☆';
+            API.showToast("Course removed from bookmarks.", "info");
+            if (currentTab === 'saved') loadSaved();
+          }
+        }
+      } catch (err) {
+        API.showToast(err.message || "Failed to update bookmark", "error");
+      }
+    }
+
+    function handleSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        if (currentTab === 'courses') loadCourses();
+      }, 300);
+    }
+  </script>
+</body>
+</html>

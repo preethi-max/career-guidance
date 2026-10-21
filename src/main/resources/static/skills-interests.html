@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills, Interests & Strengths | CareerCompass</title>
+  <meta name="description" content="Add your technical skills, soft skills, interests, and strengths to power intelligent career recommendations.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 1.5rem; flex: 1;">
+    <div class="container container-narrow">
+      <!-- Stepper Header -->
+      <div style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; font-weight: 700; color: var(--navy-900);">Step 3 of 3: Skills & Interests</span>
+          <span style="font-size: 0.85rem; color: var(--emerald-500); font-weight: 600;">Final Step</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: 100%; background: var(--emerald-500);"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 2.5rem; box-shadow: var(--shadow-md);">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Skills, Interests & Strengths</h1>
+          <p style="color: var(--slate-500); font-size: 0.95rem;">These form the foundation of our recommendation matching engine.</p>
+        </div>
+
+        <form id="skillsForm" onsubmit="handleSave(event)">
+          <!-- Technical Skills -->
+          <div class="form-group">
+            <label class="form-label" for="technicalSkills">Technical Skills *</label>
+            <textarea id="technicalSkills" class="form-control" placeholder="e.g. Java, Python, SQL, Git, HTML, CSS, JavaScript" required></textarea>
+            <p class="form-hint">Separate with commas. Click quick tags below to append:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;">
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('Java')">+ Java</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('Python')">+ Python</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('SQL')">+ SQL</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('Spring Boot')">+ Spring Boot</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('JavaScript')">+ JavaScript</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('Docker')">+ Docker</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('AWS')">+ AWS</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('Machine Learning')">+ Machine Learning</button>
+              <button type="button" class="badge badge-blue" style="cursor: pointer; border: none;" onclick="addSkill('Figma')">+ Figma</button>
+            </div>
+          </div>
+
+          <!-- Non-technical / Soft Skills -->
+          <div class="form-group">
+            <label class="form-label" for="nonTechnicalSkills">Soft Skills & Communication</label>
+            <textarea id="nonTechnicalSkills" class="form-control" placeholder="e.g. Problem Solving, Team Collaboration, Analytical Thinking, Communication"></textarea>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;">
+              <button type="button" class="badge badge-navy" style="cursor: pointer; border: none;" onclick="addSoftSkill('Problem Solving')">+ Problem Solving</button>
+              <button type="button" class="badge badge-navy" style="cursor: pointer; border: none;" onclick="addSoftSkill('Collaboration')">+ Collaboration</button>
+              <button type="button" class="badge badge-navy" style="cursor: pointer; border: none;" onclick="addSoftSkill('Analytical Thinking')">+ Analytical Thinking</button>
+              <button type="button" class="badge badge-navy" style="cursor: pointer; border: none;" onclick="addSoftSkill('Leadership')">+ Leadership</button>
+            </div>
+          </div>
+
+          <!-- Interests & Hobbies -->
+          <div class="form-group">
+            <label class="form-label" for="interests">Interests & Academic Passions</label>
+            <input type="text" id="interests" class="form-control" placeholder="e.g. Cloud Architecture, AI Research, Web Apps, Financial Systems, Design Thinking">
+          </div>
+
+          <!-- Strengths -->
+          <div class="form-group">
+            <label class="form-label" for="strengths">Key Strengths & Attributes</label>
+            <input type="text" id="strengths" class="form-control" placeholder="e.g. Fast Learner, Consistent, Debugging, Systematic Thinking">
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--slate-200);">
+            <a href="/education-details.html" class="btn btn-secondary">&larr; Back to Education</a>
+            <button type="submit" id="saveBtn" class="btn btn-primary" style="background-color: var(--emerald-500); border-color: var(--emerald-500);">
+              Finish & Go to Dashboard 🚀
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await API.requireAuth(['STUDENT']);
+      if (!user) return;
+
+      try {
+        const res = await API.get('/api/student/profile');
+        if (res.success && res.data) {
+          const p = res.data;
+          document.getElementById('technicalSkills').value = p.technicalSkills || '';
+          document.getElementById('nonTechnicalSkills').value = p.nonTechnicalSkills || '';
+          document.getElementById('interests').value = p.interests || '';
+          document.getElementById('strengths').value = p.strengths || '';
+        }
+      } catch (e) {
+        console.error("Error loading skills details:", e);
+      }
+    });
+
+    function addSkill(skill) {
+      const ta = document.getElementById('technicalSkills');
+      const current = ta.value.trim();
+      if (!current) {
+        ta.value = skill;
+      } else if (!current.toLowerCase().includes(skill.toLowerCase())) {
+        ta.value = current + ', ' + skill;
+      }
+    }
+
+    function addSoftSkill(skill) {
+      const ta = document.getElementById('nonTechnicalSkills');
+      const current = ta.value.trim();
+      if (!current) {
+        ta.value = skill;
+      } else if (!current.toLowerCase().includes(skill.toLowerCase())) {
+        ta.value = current + ', ' + skill;
+      }
+    }
+
+    async function handleSave(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'Calculating recommendations...';
+
+      const payload = {
+        technicalSkills: document.getElementById('technicalSkills').value.trim(),
+        nonTechnicalSkills: document.getElementById('nonTechnicalSkills').value.trim(),
+        interests: document.getElementById('interests').value.trim(),
+        strengths: document.getElementById('strengths').value.trim()
+      };
+
+      try {
+        const res = await API.put('/api/student/profile', payload);
+        if (res.success) {
+          API.showToast("Profile completed! Generating recommendations...", "success");
+          setTimeout(() => {
+            window.location.href = '/dashboard.html';
+          }, 600);
+        } else {
+          API.showToast(res.message || "Failed to save skills", "error");
+          saveBtn.disabled = false;
+          saveBtn.innerText = 'Finish & Go to Dashboard 🚀';
+        }
+      } catch (err) {
+        API.showToast(err.message, "error");
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Finish & Go to Dashboard 🚀';
+      }
+    }
+  </script>
+</body>
+</html>

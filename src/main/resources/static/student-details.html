@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Details & Goals | CareerCompass</title>
+  <meta name="description" content="Enter personal information and career aspirations to build your student profile.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 1.5rem; flex: 1;">
+    <div class="container container-narrow">
+      <!-- Stepper Header -->
+      <div style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; font-weight: 700; color: var(--navy-900);">Step 1 of 3: Personal & Goals</span>
+          <span style="font-size: 0.85rem; color: var(--blue-600); font-weight: 600;">33% Complete</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: 33%;"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 2.5rem; box-shadow: var(--shadow-md);">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Personal Details & Aspirations</h1>
+          <p style="color: var(--slate-500); font-size: 0.95rem;">Tell us about yourself and what you want to achieve.</p>
+        </div>
+
+        <form id="studentDetailsForm" onsubmit="handleSave(event)">
+          <div class="form-group">
+            <label class="form-label" for="fullName">Full Name *</label>
+            <input type="text" id="fullName" class="form-control" placeholder="Aarav Sharma" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address</label>
+              <input type="email" id="email" class="form-control" disabled style="background-color: var(--slate-100); color: var(--slate-500);">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone Number</label>
+              <input type="tel" id="phone" class="form-control" placeholder="+91 98765 43210">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="preferredFields">Preferred Career Fields / Industries *</label>
+            <input type="text" id="preferredFields" class="form-control" placeholder="e.g. Software Development, Cloud Computing, Artificial Intelligence" required>
+            <p class="form-hint">Separate multiple fields with commas.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="shortTermGoal">Short-Term Career Goal (Next 6 - 12 Months)</label>
+            <textarea id="shortTermGoal" class="form-control" placeholder="e.g. Land a summer internship in software engineering and master Data Structures."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="longTermGoal">Long-Term Career Vision (Next 3 - 5 Years)</label>
+            <textarea id="longTermGoal" class="form-control" placeholder="e.g. Become a Lead Cloud Solutions Architect driving resilient distributed applications."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--slate-200);">
+            <a href="/dashboard.html" class="btn btn-secondary">Skip to Dashboard</a>
+            <button type="submit" id="saveBtn" class="btn btn-primary">Save & Continue to Education &rarr;</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await API.requireAuth(['STUDENT']);
+      if (!user) return;
+
+      try {
+        const res = await API.get('/api/student/profile');
+        if (res.success && res.data) {
+          const p = res.data;
+          document.getElementById('fullName').value = p.fullName || user.fullName || '';
+          document.getElementById('email').value = p.email || user.email || '';
+          document.getElementById('phone').value = p.phone || user.phone || '';
+          document.getElementById('preferredFields').value = p.preferredFields || '';
+          document.getElementById('shortTermGoal').value = p.shortTermGoal || '';
+          document.getElementById('longTermGoal').value = p.longTermGoal || '';
+        }
+      } catch (e) {
+        console.error("Error loading profile:", e);
+      }
+    });
+
+    async function handleSave(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'Saving...';
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        preferredFields: document.getElementById('preferredFields').value.trim(),
+        shortTermGoal: document.getElementById('shortTermGoal').value.trim(),
+        longTermGoal: document.getElementById('longTermGoal').value.trim()
+      };
+
+      try {
+        const res = await API.put('/api/student/profile', payload);
+        if (res.success) {
+          API.showToast("Personal details saved successfully!", "success");
+          setTimeout(() => {
+            window.location.href = '/education-details.html';
+          }, 500);
+        } else {
+          API.showToast(res.message || "Failed to save profile", "error");
+          saveBtn.disabled = false;
+          saveBtn.innerText = 'Save & Continue to Education →';
+        }
+      } catch (err) {
+        API.showToast(err.message, "error");
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Save & Continue to Education →';
+      }
+    }
+  </script>
+</body>
+</html>

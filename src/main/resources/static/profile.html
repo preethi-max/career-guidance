@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile & Settings | CareerCompass</title>
+  <meta name="description" content="View and edit all personal, educational, skill, and career goal details.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 0; flex: 1;">
+    <div class="container container-narrow">
+      <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span class="badge badge-navy">Account & Profile</span>
+          <h1 style="font-size: 2.25rem; margin-top: 0.35rem;">Profile & Guidance Settings</h1>
+          <p style="color: var(--slate-500); font-size: 1rem; margin-top: 0.25rem;">
+            Keep your credentials and preferences current to receive the best career matches.
+          </p>
+        </div>
+        <div style="background: var(--white); padding: 0.75rem 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--slate-200); text-align: right;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--slate-500); font-weight: 700;">Completeness</div>
+          <div style="font-size: 1.25rem; font-weight: 800; color: var(--blue-600);" id="topCompPercent">0%</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 2.5rem; box-shadow: var(--shadow-md);">
+        <form id="fullProfileForm" onsubmit="handleSaveAll(event)">
+          <!-- Section 1: Personal Info -->
+          <h3 style="font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-200); padding-bottom: 0.5rem;">
+            👤 Personal Details
+          </h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label" for="fullName">Full Name *</label>
+              <input type="text" id="fullName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone Number</label>
+              <input type="tel" id="phone" class="form-control">
+            </div>
+          </div>
+
+          <!-- Section 2: Education -->
+          <h3 style="font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-200); padding-bottom: 0.5rem;">
+            🎓 Academic Background
+          </h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="educationLevel">Education Level</label>
+              <select id="educationLevel" class="form-control">
+                <option value="High School">High School</option>
+                <option value="Undergraduate">Undergraduate (Bachelors)</option>
+                <option value="Postgraduate">Postgraduate (Masters)</option>
+                <option value="Diploma">Diploma / Vocational</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="degree">Degree</label>
+              <input type="text" id="degree" class="form-control" placeholder="e.g. B.Tech">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="branch">Major / Branch</label>
+              <input type="text" id="branch" class="form-control" placeholder="e.g. Computer Science">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="collegeName">College / University</label>
+              <input type="text" id="collegeName" class="form-control">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label class="form-label" for="yearOfStudy">Year of Study</label>
+              <select id="yearOfStudy" class="form-control">
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+                <option value="Recent Graduate">Recent Graduate</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="marksOrCgpa">CGPA / Percentage</label>
+              <input type="text" id="marksOrCgpa" class="form-control">
+            </div>
+          </div>
+
+          <!-- Section 3: Skills & Passions -->
+          <h3 style="font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-200); padding-bottom: 0.5rem;">
+            ⚡ Skills & Passions
+          </h3>
+          <div class="form-group">
+            <label class="form-label" for="technicalSkills">Technical Skills (comma-separated)</label>
+            <textarea id="technicalSkills" class="form-control"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nonTechnicalSkills">Soft Skills</label>
+            <input type="text" id="nonTechnicalSkills" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="interests">Interests & Academic Topics</label>
+            <input type="text" id="interests" class="form-control">
+          </div>
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label" for="strengths">Key Strengths</label>
+            <input type="text" id="strengths" class="form-control">
+          </div>
+
+          <!-- Section 4: Goals -->
+          <h3 style="font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 1px solid var(--slate-200); padding-bottom: 0.5rem;">
+            🎯 Career Aspirations
+          </h3>
+          <div class="form-group">
+            <label class="form-label" for="preferredFields">Preferred Fields / Industries</label>
+            <input type="text" id="preferredFields" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="shortTermGoal">Short-Term Goal</label>
+            <textarea id="shortTermGoal" class="form-control"></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom: 2rem;">
+            <label class="form-label" for="longTermGoal">Long-Term Goal</label>
+            <textarea id="longTermGoal" class="form-control"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--slate-200); padding-top: 1.5rem;">
+            <a href="/dashboard.html" class="btn btn-secondary">&larr; Return to Dashboard</a>
+            <button type="submit" id="saveAllBtn" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+              Save Profile Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await API.requireAuth(['STUDENT']);
+      if (!user) return;
+
+      loadProfile();
+    });
+
+    async function loadProfile() {
+      try {
+        const res = await API.get('/api/student/profile');
+        if (res.success && res.data) {
+          const p = res.data;
+          document.getElementById('topCompPercent').innerText = `${p.profileCompletionPercentage || 0}%`;
+
+          document.getElementById('fullName').value = p.fullName || '';
+          document.getElementById('phone').value = p.phone || '';
+          if (p.educationLevel) document.getElementById('educationLevel').value = p.educationLevel;
+          document.getElementById('degree').value = p.degree || '';
+          document.getElementById('branch').value = p.branch || '';
+          document.getElementById('collegeName').value = p.collegeName || '';
+          if (p.yearOfStudy) document.getElementById('yearOfStudy').value = p.yearOfStudy;
+          document.getElementById('marksOrCgpa').value = p.marksOrCgpa || '';
+          document.getElementById('technicalSkills').value = p.technicalSkills || '';
+          document.getElementById('nonTechnicalSkills').value = p.nonTechnicalSkills || '';
+          document.getElementById('interests').value = p.interests || '';
+          document.getElementById('strengths').value = p.strengths || '';
+          document.getElementById('preferredFields').value = p.preferredFields || '';
+          document.getElementById('shortTermGoal').value = p.shortTermGoal || '';
+          document.getElementById('longTermGoal').value = p.longTermGoal || '';
+        }
+      } catch (err) {
+        console.error("Error loading profile:", err);
+      }
+    }
+
+    async function handleSaveAll(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveAllBtn');
+      btn.disabled = true;
+      btn.innerText = 'Saving updates...';
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        educationLevel: document.getElementById('educationLevel').value,
+        degree: document.getElementById('degree').value.trim(),
+        branch: document.getElementById('branch').value.trim(),
+        collegeName: document.getElementById('collegeName').value.trim(),
+        yearOfStudy: document.getElementById('yearOfStudy').value,
+        marksOrCgpa: document.getElementById('marksOrCgpa').value.trim(),
+        technicalSkills: document.getElementById('technicalSkills').value.trim(),
+        nonTechnicalSkills: document.getElementById('nonTechnicalSkills').value.trim(),
+        interests: document.getElementById('interests').value.trim(),
+        strengths: document.getElementById('strengths').value.trim(),
+        preferredFields: document.getElementById('preferredFields').value.trim(),
+        shortTermGoal: document.getElementById('shortTermGoal').value.trim(),
+        longTermGoal: document.getElementById('longTermGoal').value.trim()
+      };
+
+      try {
+        const res = await API.put('/api/student/profile', payload);
+        if (res.success && res.data) {
+          API.showToast("All profile settings updated successfully!", "success");
+          document.getElementById('topCompPercent').innerText = `${res.data.profileCompletionPercentage}%`;
+        } else {
+          API.showToast(res.message || "Failed to update profile", "error");
+        }
+      } catch (e) {
+        API.showToast(e.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Profile Changes';
+      }
+    }
+  </script>
+</body>
+</html>

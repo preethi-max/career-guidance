@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student–Mentor Live Chat | CareerCompass</title>
+  <meta name="description" content="Direct 1-on-1 messaging between students and approved career guides.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 2rem 0; flex: 1;">
+    <div class="container container-narrow">
+      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/dashboard.html" class="btn btn-sm btn-secondary" id="backBtn">&larr; Back to Dashboard</a>
+        <span class="badge badge-success" id="connectionBadge">Connected Session</span>
+      </div>
+
+      <div class="chat-window">
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div>
+            <h3 style="color: var(--white); font-size: 1.15rem;" id="chatPartnerName">Chat Partner</h3>
+            <p style="font-size: 0.8rem; color: var(--blue-400);" id="chatPartnerRole">Verified Guidance Connection</p>
+          </div>
+          <span style="font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 0.25rem 0.65rem; border-radius: var(--radius-full);">
+            Live Polling Active 🟢
+          </span>
+        </div>
+
+        <!-- Scrollable Message List -->
+        <div class="chat-messages" id="chatMessages">
+          <div style="text-align: center; color: var(--slate-400); padding: 2rem;">Loading conversation history...</div>
+        </div>
+
+        <!-- Input Bar -->
+        <form class="chat-input-bar" onsubmit="sendMessage(event)">
+          <input type="text" id="chatInput" class="form-control" placeholder="Type your career question or guidance message here..." required autocomplete="off">
+          <button type="submit" id="sendBtn" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.4rem;">
+            <span>Send</span>
+            <span>➤</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    let currentRequestId = null;
+    let currentUser = null;
+    let pollInterval = null;
+    let lastLoadedTime = null;
+    let loadedMessageIds = new Set();
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      currentUser = await API.requireAuth();
+      if (!currentUser) return;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      currentRequestId = urlParams.get('requestId');
+
+      if (!currentRequestId) {
+        alert("No connection request specified.");
+        window.location.href = '/dashboard.html';
+        return;
+      }
+
+      // If user is career guide, adjust back button
+      if (currentUser.role === 'CAREER_GUIDE') {
+        document.getElementById('backBtn').href = '/guide-dashboard.html';
+        document.getElementById('backBtn').innerText = '← Back to Guide Portal';
+      }
+
+      await loadConnectionDetails();
+      await loadInitialMessages();
+
+      // Start live polling every 3 seconds
+      pollInterval = setInterval(pollNewMessages, 3000);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (pollInterval) clearInterval(pollInterval);
+    });
+
+    async function loadConnectionDetails() {
+      try {
+        const res = await API.get(`/api/mentors/requests/${currentRequestId}`);
+        if (res.success && res.data) {
+          const req = res.data;
+          const isGuide = currentUser.role === 'CAREER_GUIDE';
+          const partnerName = isGuide ? req.studentName : req.guideName;
+          const partnerRole = isGuide ? 'Student Aspirant' : (req.guideDesignation || 'Career Guide');
+
+          document.getElementById('chatPartnerName').innerText = partnerName || 'Connected Guide';
+          document.getElementById('chatPartnerRole').innerText = partnerRole;
+
+          if (req.status !== 'ACCEPTED') {
+            document.getElementById('connectionBadge').className = 'badge badge-warning';
+            document.getElementById('connectionBadge').innerText = `Status: ${req.status}`;
+            document.getElementById('chatInput').disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('chatInput').placeholder = 'Messaging disabled until request is accepted.';
+          }
+        }
+      } catch (e) {
+        console.error("Error loading connection details:", e);
+      }
+    }
+
+    async function loadInitialMessages() {
+      const container = document.getElementById('chatMessages');
+      try {
+        const res = await API.get(`/api/chat/conversations/${currentRequestId}/messages`);
+        if (res.success && res.data) {
+          const messages = res.data;
+          loadedMessageIds.clear();
+
+          if (messages.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; color: var(--slate-400); padding: 3rem 1rem;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
+                <p>No messages yet. Send a message to start clarifying your career questions!</p>
+              </div>
+            `;
+            return;
+          }
+
+          container.innerHTML = '';
+          messages.forEach(msg => appendMessageElement(msg, container));
+          scrollToBottom();
+
+          if (messages.length > 0) {
+            lastLoadedTime = messages[messages.length - 1].sentAt;
+          }
+        }
+      } catch (err) {
+        container.innerHTML = `<div style="color: var(--rose-500); padding: 2rem;">Failed to load messages: ${err.message}</div>`;
+      }
+    }
+
+    async function pollNewMessages() {
+      if (!currentRequestId) return;
+      try {
+        let url = `/api/chat/conversations/${currentRequestId}/messages`;
+        if (lastLoadedTime) {
+          url += `?after=${encodeURIComponent(lastLoadedTime)}`;
+        }
+        const res = await API.get(url);
+        if (res.success && res.data && res.data.length > 0) {
+          const newMessages = res.data.filter(m => !loadedMessageIds.has(m.id));
+          if (newMessages.length > 0) {
+            const container = document.getElementById('chatMessages');
+            // Remove empty placeholder if present
+            if (container.querySelector('div[style*="font-size: 2rem"]')) {
+              container.innerHTML = '';
+            }
+
+            newMessages.forEach(msg => appendMessageElement(msg, container));
+            lastLoadedTime = newMessages[newMessages.length - 1].sentAt;
+            scrollToBottom();
+          }
+        }
+      } catch (e) {
+        console.warn("Chat poll warning:", e);
+      }
+    }
+
+    function appendMessageElement(msg, container) {
+      if (loadedMessageIds.has(msg.id)) return;
+      loadedMessageIds.add(msg.id);
+
+      const isMine = msg.mine;
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${isMine ? 'mine' : 'theirs'}`;
+
+      const timeFormatted = msg.sentAt ? new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+      bubble.innerHTML = `
+        <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.25rem; opacity: 0.85;">
+          ${isMine ? 'You' : msg.senderName}
+        </div>
+        <div>${escapeHtml(msg.messageText)}</div>
+        <div class="chat-time">${timeFormatted}</div>
+      `;
+
+      container.appendChild(bubble);
+    }
+
+    async function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.disabled = true;
+
+      try {
+        const res = await API.post('/api/chat/send', {
+          connectionRequestId: parseInt(currentRequestId, 10),
+          messageText: text
+        });
+
+        if (res.success && res.data) {
+          input.value = '';
+          const container = document.getElementById('chatMessages');
+          if (container.querySelector('div[style*="font-size: 2rem"]')) {
+            container.innerHTML = '';
+          }
+          appendMessageElement(res.data, container);
+          lastLoadedTime = res.data.sentAt;
+          scrollToBottom();
+        } else {
+          API.showToast(res.message || "Failed to send message", "error");
+        }
+      } catch (err) {
+        API.showToast(err.message, "error");
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('chatMessages');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

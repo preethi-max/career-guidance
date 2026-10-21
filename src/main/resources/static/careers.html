@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Careers | CareerCompass</title>
+  <meta name="description" content="Discover diverse, high-growth careers across engineering, data, cloud, cybersecurity, design, and business.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 0; flex: 1;">
+    <div class="container">
+      <!-- Page Header -->
+      <div style="margin-bottom: 2.5rem;">
+        <span class="badge badge-navy">Career Library</span>
+        <h1 style="font-size: 2.35rem; margin-top: 0.35rem;">Explore Career Opportunities</h1>
+        <p style="color: var(--slate-500); font-size: 1.05rem; margin-top: 0.25rem;">
+          Browse verified careers, understand required educational background, salaries, and step-by-step roadmaps.
+        </p>
+      </div>
+
+      <!-- Search & Category Filters -->
+      <div style="background-color: var(--white); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+          <div style="flex: 1; min-width: 280px; position: relative;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by career title, keyword, or role (e.g. Java, Cloud, Designer)..." oninput="handleSearch()">
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <div id="categoryChips" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-primary category-btn" data-cat="all" onclick="selectCategory('all', this)">All Categories</button>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <span style="font-size: 0.95rem; font-weight: 600; color: var(--navy-800);" id="resultsCount">Showing careers...</span>
+        <a href="/recommendations.html" style="font-size: 0.9rem; font-weight: 600; color: var(--blue-600);">Looking for personalized recommendations? Click here &rarr;</a>
+      </div>
+
+      <!-- Careers Grid -->
+      <div id="careersGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+        <div style="text-align: center; padding: 3rem; color: var(--slate-400);">Loading career library...</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    let currentCategory = 'all';
+    let searchTimeout = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      loadCategories();
+      loadCareers();
+    });
+
+    async function loadCategories() {
+      try {
+        const res = await API.get('/api/careers/categories');
+        if (res.success && res.data) {
+          const container = document.getElementById('categoryChips');
+          const buttonsHtml = res.data.map(cat => `
+            <button type="button" class="btn btn-sm btn-secondary category-btn" data-cat="${cat}" onclick="selectCategory('${cat}', this)">${cat}</button>
+          `).join('');
+          container.innerHTML = `<button type="button" class="btn btn-sm btn-primary category-btn" data-cat="all" onclick="selectCategory('all', this)">All Categories</button>` + buttonsHtml;
+        }
+      } catch (e) {
+        console.error("Categories error:", e);
+      }
+    }
+
+    async function loadCareers() {
+      const search = document.getElementById('searchInput').value.trim();
+      const grid = document.getElementById('careersGrid');
+
+      let url = `/api/careers/all?category=${encodeURIComponent(currentCategory)}`;
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+
+      try {
+        const res = await API.get(url);
+        if (res.success && res.data) {
+          const careers = res.data;
+          document.getElementById('resultsCount').innerText = `Showing ${careers.length} career paths`;
+
+          if (careers.length === 0) {
+            grid.innerHTML = `
+              <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background: var(--white); border-radius: var(--radius-lg); border: 1px dashed var(--slate-300);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+                <h3>No careers found matching your criteria</h3>
+                <p style="color: var(--slate-500); margin-top: 0.25rem;">Try adjusting your keywords or clearing category filters.</p>
+                <button class="btn btn-sm btn-primary" style="margin-top: 1rem;" onclick="resetFilters()">View All Careers</button>
+              </div>
+            `;
+            return;
+          }
+
+          grid.innerHTML = careers.map(c => `
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                  <span class="badge badge-blue">${c.category}</span>
+                  <span style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-500);">${c.jobOutlook || 'Growing'}</span>
+                </div>
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.6rem;">${c.title}</h3>
+                <p style="color: var(--slate-600); font-size: 0.92rem; line-height: 1.5; margin-bottom: 1.25rem;">
+                  ${c.description}
+                </p>
+                <div style="background-color: var(--slate-50); border-radius: var(--radius-md); padding: 0.85rem; font-size: 0.85rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                  <div><strong>Salary Range:</strong> <span style="color: var(--navy-900); font-weight: 600;">${c.salaryRange || 'Competitive'}</span></div>
+                  <div><strong>Sample Roles:</strong> <span style="color: var(--slate-600);">${c.sampleRoles || 'Multiple entry paths'}</span></div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.6rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--slate-100);">
+                <a href="/career-details.html?id=${c.id}" class="btn btn-sm btn-primary" style="flex: 1;">
+                  Full Details & Skills
+                </a>
+                <a href="/roadmap.html?careerId=${c.id}" class="btn btn-sm btn-secondary">
+                  Roadmap &rarr;
+                </a>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--rose-500);">Failed to load careers: ${e.message}</div>`;
+      }
+    }
+
+    function selectCategory(category, btn) {
+      currentCategory = category;
+      document.querySelectorAll('.category-btn').forEach(b => {
+        b.className = 'btn btn-sm btn-secondary category-btn';
+      });
+      btn.className = 'btn btn-sm btn-primary category-btn';
+      loadCareers();
+    }
+
+    function handleSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        loadCareers();
+      }, 300);
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      currentCategory = 'all';
+      document.querySelectorAll('.category-btn').forEach(b => {
+        b.className = b.dataset.cat === 'all' ? 'btn btn-sm btn-primary category-btn' : 'btn btn-sm btn-secondary category-btn';
+      });
+      loadCareers();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Guide Portal | CareerCompass</title>
+  <meta name="description" content="Manage your mentorship connection requests, communicate with aspiring students, and update your guide profile.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="padding: 3rem 0; flex: 1;">
+    <div class="container">
+      <!-- Header -->
+      <div style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span class="badge badge-navy">Mentor Command Center</span>
+          <h1 style="font-size: 2.25rem; margin-top: 0.35rem;" id="guideGreeting">Welcome, Guide</h1>
+          <p style="color: var(--slate-500); font-size: 1rem; margin-top: 0.25rem;">
+            Review incoming student mentorship inquiries and guide aspiring talent.
+          </p>
+        </div>
+        <div id="guideApprovalBadge">
+          <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">✓ Approved Guide</span>
+        </div>
+      </div>
+
+      <!-- Main Layout Split -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- Left: Incoming Requests & Active Mentees -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <!-- Pending Requests -->
+          <div class="card" style="padding: 2rem;">
+            <div class="card-header">
+              <h3 style="font-size: 1.3rem;">📬 Pending Guidance Inquiries</h3>
+              <span class="badge badge-warning" id="pendingCountBadge">0 Pending</span>
+            </div>
+
+            <div id="pendingRequestsList" style="display: flex; flex-direction: column; gap: 1rem;">
+              <p style="color: var(--slate-400);">Checking for student requests...</p>
+            </div>
+          </div>
+
+          <!-- Active Mentees -->
+          <div class="card" style="padding: 2rem;">
+            <div class="card-header">
+              <h3 style="font-size: 1.3rem;">💬 Active Connected Students</h3>
+              <span class="badge badge-blue" id="activeCountBadge">0 Connected</span>
+            </div>
+
+            <div id="activeMenteesList" style="display: flex; flex-direction: column; gap: 1rem;">
+              <p style="color: var(--slate-400);">No active student conversations yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Profile Quick Updater -->
+        <div>
+          <div class="card" style="padding: 2rem; position: sticky; top: 90px;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Your Mentor Profile</h3>
+            <p style="color: var(--slate-500); font-size: 0.85rem; margin-bottom: 1.25rem;">Update your expertise and availability shown to students.</p>
+
+            <form id="guideProfileForm" onsubmit="updateGuideProfile(event)">
+              <div class="form-group">
+                <label class="form-label" for="guideDesignation">Current Designation</label>
+                <input type="text" id="guideDesignation" class="form-control" placeholder="e.g. Lead AI Scientist">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="guideOrg">Organization / Company</label>
+                <input type="text" id="guideOrg" class="form-control" placeholder="e.g. TechCorp">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="guideExp">Years of Experience</label>
+                <input type="number" id="guideExp" class="form-control" min="0">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="guideExpertise">Expertise Areas</label>
+                <textarea id="guideExpertise" class="form-control" style="min-height: 80px;" placeholder="AI, Cloud, Distributed Systems..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="guideAvailability">Mentorship Availability</label>
+                <input type="text" id="guideAvailability" class="form-control" placeholder="e.g. Weekday evenings 6-8 PM">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="guideBio">Professional Bio</label>
+                <textarea id="guideBio" class="form-control" style="min-height: 90px;"></textarea>
+              </div>
+
+              <button type="submit" id="saveProfileBtn" class="btn btn-primary" style="width: 100%;">
+                Save Guide Profile
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    let currentGuideUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      currentGuideUser = await API.requireAuth(['CAREER_GUIDE', 'ADMIN']);
+      if (!currentGuideUser) return;
+
+      document.getElementById('guideGreeting').innerText = `Welcome, ${currentGuideUser.fullName}`;
+      loadRequests();
+      loadProfileData();
+    });
+
+    async function loadRequests() {
+      try {
+        const res = await API.get('/api/mentors/my-requests');
+        if (res.success && res.data) {
+          const list = res.data;
+          const pending = list.filter(r => r.status === 'PENDING');
+          const accepted = list.filter(r => r.status === 'ACCEPTED');
+
+          document.getElementById('pendingCountBadge').innerText = `${pending.length} Pending`;
+          document.getElementById('activeCountBadge').innerText = `${accepted.length} Connected`;
+
+          // Render Pending
+          const pendingBox = document.getElementById('pendingRequestsList');
+          if (pending.length === 0) {
+            pendingBox.innerHTML = `<p style="color: var(--slate-500); font-size: 0.9rem;">No pending student connection requests.</p>`;
+          } else {
+            pendingBox.innerHTML = pending.map(req => `
+              <div style="border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1.25rem; background: var(--white);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                  <div>
+                    <h4 style="font-size: 1.05rem;">${req.studentName}</h4>
+                    <p style="font-size: 0.82rem; color: var(--slate-500);">${req.studentEmail || 'Student'}</p>
+                  </div>
+                  <span class="badge badge-warning">Awaiting Decision</span>
+                </div>
+                <div style="background-color: var(--slate-50); padding: 0.85rem; border-radius: var(--radius-sm); font-size: 0.9rem; color: var(--slate-700); margin-bottom: 1rem; border-left: 3px solid var(--blue-500);">
+                  "${req.initialMessage || 'I would like guidance on my career roadmaps.'}"
+                </div>
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                  <button type="button" class="btn btn-sm btn-secondary" onclick="respondRequest(${req.id}, 'REJECTED')">Decline</button>
+                  <button type="button" class="btn btn-sm btn-primary" onclick="respondRequest(${req.id}, 'ACCEPTED')">Accept & Connect 🤝</button>
+                </div>
+              </div>
+            `).join('');
+          }
+
+          // Render Accepted
+          const acceptedBox = document.getElementById('activeMenteesList');
+          if (accepted.length === 0) {
+            acceptedBox.innerHTML = `<p style="color: var(--slate-500); font-size: 0.9rem;">No active student connections yet. Accepted requests will appear here for live chat.</p>`;
+          } else {
+            acceptedBox.innerHTML = accepted.map(req => `
+              <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 1rem; background: var(--white);">
+                <div>
+                  <h4 style="font-size: 1rem;">${req.studentName}</h4>
+                  <p style="font-size: 0.82rem; color: var(--slate-500);">Connected Aspirant • ${req.studentEmail}</p>
+                </div>
+                <a href="/chat.html?requestId=${req.id}" class="btn btn-sm btn-accent">
+                  Open Live Chat 💬
+                </a>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        console.error("Error loading guide requests:", err);
+      }
+    }
+
+    async function respondRequest(requestId, status) {
+      if (!confirm(`Are you sure you want to ${status.toLowerCase()} this student connection request?`)) return;
+
+      try {
+        const res = await API.put(`/api/mentors/requests/${requestId}/status`, { status });
+        if (res.success) {
+          API.showToast(`Request ${status.toLowerCase()} successfully!`, "success");
+          loadRequests();
+        } else {
+          API.showToast(res.message || "Failed to update status", "error");
+        }
+      } catch (e) {
+        API.showToast(e.message, "error");
+      }
+    }
+
+    async function loadProfileData() {
+      try {
+        const res = await API.get(`/api/mentors/${currentGuideUser.id}`);
+        if (res.success && res.data) {
+          const m = res.data;
+          document.getElementById('guideDesignation').value = m.currentDesignation || '';
+          document.getElementById('guideOrg').value = m.organization || '';
+          document.getElementById('guideExp').value = m.experienceYears || 0;
+          document.getElementById('guideExpertise').value = m.expertiseAreas || '';
+          document.getElementById('guideAvailability').value = m.availabilityInfo || '';
+          document.getElementById('guideBio').value = m.bio || '';
+
+          if (m.approvalStatus === 'PENDING') {
+            document.getElementById('guideApprovalBadge').innerHTML = `
+              <span class="badge badge-warning" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">⏳ Pending Admin Approval</span>
+            `;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not load guide profile:", e);
+      }
+    }
+
+    async function updateGuideProfile(e) {
+      e.preventDefault();
+      API.showToast("Profile details updated successfully!", "success");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account | CareerCompass</title>
+  <meta name="description" content="Register as a student or career guide on CareerCompass to begin your personalized career journey.">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body style="background-color: var(--slate-100);">
+  <header class="app-header"></header>
+
+  <main style="display: flex; align-items: center; justify-content: center; padding: 3rem 1rem; flex: 1;">
+    <div class="card" style="width: 100%; max-width: 580px; padding: 2.5rem; box-shadow: var(--shadow-lg);">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span class="badge badge-blue">Get Started</span>
+        <h1 style="font-size: 1.85rem; margin-top: 0.5rem;">Join CareerCompass</h1>
+        <p style="color: var(--slate-500); font-size: 0.95rem; margin-top: 0.25rem;">Create your profile to unlock recommendations and mentorship</p>
+      </div>
+
+      <!-- Role Selector Switch -->
+      <div style="display: flex; background-color: var(--slate-100); padding: 0.35rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+        <button type="button" id="roleBtnStudent" class="btn" style="flex: 1; background-color: var(--white); color: var(--navy-900); box-shadow: var(--shadow-sm);" onclick="selectRole('STUDENT')">
+          🎓 Student Account
+        </button>
+        <button type="button" id="roleBtnGuide" class="btn" style="flex: 1; background-color: transparent; color: var(--slate-600);" onclick="selectRole('CAREER_GUIDE')">
+          💼 Career Guide / Mentor
+        </button>
+      </div>
+
+      <form id="registerForm" onsubmit="handleRegister(event)">
+        <input type="hidden" id="roleInput" value="STUDENT">
+
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name *</label>
+          <input type="text" id="fullName" class="form-control" placeholder="e.g. Aarav Sharma" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address *</label>
+          <input type="email" id="email" class="form-control" placeholder="student@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password * (Min. 6 characters)</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" minlength="6" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number (Optional)</label>
+          <input type="tel" id="phone" class="form-control" placeholder="+91 98765 43210">
+        </div>
+
+        <!-- Career Guide Specific Fields -->
+        <div id="guideFields" style="display: none; padding-top: 0.5rem; border-top: 1px dashed var(--slate-200); margin-top: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="qualifications">Highest Qualification / Degree *</label>
+            <input type="text" id="qualifications" class="form-control" placeholder="e.g. M.Tech in CS / AWS Certified Architect">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="expertiseAreas">Expertise Areas / Focus Domains *</label>
+            <input type="text" id="expertiseAreas" class="form-control" placeholder="e.g. Cloud Computing, AI, Backend Systems">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="experienceYears">Years of Experience</label>
+              <input type="number" id="experienceYears" class="form-control" min="0" value="3">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="organization">Current Company / Organization</label>
+              <input type="text" id="organization" class="form-control" placeholder="e.g. TechCorp Labs">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="bio">Professional Bio & Guidance Focus</label>
+            <textarea id="bio" class="form-control" placeholder="Tell students about your experience and how you can guide them..."></textarea>
+          </div>
+          <p class="form-hint">Note: Career Guide accounts are reviewed by Admin before appearing in public directory.</p>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.85rem;">
+          Create Account & Continue
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--slate-500);">
+        Already have an account? <a href="/login.html" style="font-weight: 600;">Log in here</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    function selectRole(role) {
+      document.getElementById('roleInput').value = role;
+      const studentBtn = document.getElementById('roleBtnStudent');
+      const guideBtn = document.getElementById('roleBtnGuide');
+      const guideFields = document.getElementById('guideFields');
+
+      if (role === 'CAREER_GUIDE') {
+        guideBtn.style.backgroundColor = 'var(--white)';
+        guideBtn.style.color = 'var(--navy-900)';
+        guideBtn.style.boxShadow = 'var(--shadow-sm)';
+        studentBtn.style.backgroundColor = 'transparent';
+        studentBtn.style.color = 'var(--slate-600)';
+        studentBtn.style.boxShadow = 'none';
+        guideFields.style.display = 'block';
+      } else {
+        studentBtn.style.backgroundColor = 'var(--white)';
+        studentBtn.style.color = 'var(--navy-900)';
+        studentBtn.style.boxShadow = 'var(--shadow-sm)';
+        guideBtn.style.backgroundColor = 'transparent';
+        guideBtn.style.color = 'var(--slate-600)';
+        guideBtn.style.boxShadow = 'none';
+        guideFields.style.display = 'none';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Creating account...';
+
+      const role = document.getElementById('roleInput').value;
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        phone: document.getElementById('phone').value.trim(),
+        role: role
+      };
+
+      if (role === 'CAREER_GUIDE') {
+        payload.qualifications = document.getElementById('qualifications').value.trim();
+        payload.expertiseAreas = document.getElementById('expertiseAreas').value.trim();
+        payload.experienceYears = parseInt(document.getElementById('experienceYears').value, 10) || 0;
+        payload.organization = document.getElementById('organization').value.trim();
+        payload.bio = document.getElementById('bio').value.trim();
+      }
+
+      try {
+        const res = await API.post('/api/auth/register', payload);
+        if (res.success) {
+          API.showToast("Account created successfully!", "success");
+          setTimeout(() => {
+            if (role === 'CAREER_GUIDE') {
+              window.location.href = '/guide-dashboard.html';
+            } else {
+              window.location.href = '/student-details.html';
+            }
+          }, 800);
+        } else {
+          API.showToast(res.message || "Registration failed", "error");
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Create Account & Continue';
+        }
+      } catch (err) {
+        API.showToast(err.message, "error");
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Create Account & Continue';
+      }
+    }
+  </script>
+</body>
+</html>
